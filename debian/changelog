@@ -1,3 +1,9 @@
+llvm-toolchain-3.7 (1:3.7~dev) UNRELEASED; urgency=medium
+
+  * New snapshot release
+
+ -- Andrew Wilkins <axwalk@gmail.com>  Mon, 29 Jun 2015 19:29:12 +0800
+
 llvm-toolchain-3.6 (1:3.6.2-3) UNRELEASED; urgency=medium
 
   * Preparation of the new stable release
