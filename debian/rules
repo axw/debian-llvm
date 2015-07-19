@@ -180,6 +180,7 @@ override_dh_auto_configure: preconfigure
 	-DFFI_INCLUDE_DIR=/usr/include/$(DEB_HOST_MULTIARCH) \
 	-DFFI_LIBRARY_DIR=/usr/lib/$(DEB_HOST_MULTIARCH) \
 	-DLLVM_ENABLE_SPHINX=ON \
+	-DLLVM_BUILD_DOCS=ON \
 	-DGO_EXECUTABLE=$(GOROOT)/bin/go # TODO(axw) remove this
 
 	# TODO(axw) PRE_PROCESS_CONF
@@ -344,7 +345,8 @@ override_dh_installdeb:
 ifeq (,$(filter nocheck, $(DEB_BUILD_OPTIONS)))
 # List of the archs we know we have 100 % tests working
 ARCH_LLVM_TEST_OK := amd64 i386
-TEST_TARGETS := check check-clang check-llgo
+#TEST_TARGETS := check check-clang check-llgo # TODO(axw)
+TEST_TARGETS := check
 override_dh_auto_test:
 
 # Run tests
