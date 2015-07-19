@@ -1,2 +1,1 @@
 usr/lib/llvm-@LLVM_VERSION@/bin/clang-modernize
-usr/bin/clang-modernize-@LLVM_VERSION@
