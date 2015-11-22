@@ -17,8 +17,8 @@ endif
 
 VENDOR=$(shell lsb_release -is)
 
-AUTOCONF_BUILD=yes
-BUILD_DIR=Release
+AUTOCONF_BUILD=no
+BUILD_DIR=
 
 DEB_HOST_MULTIARCH  = $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 DEB_HOST_GNU_TYPE   = $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
@@ -306,15 +306,17 @@ override_dh_auto_install:
 		fi; \
 	done
 
-	cd debian/tmp/usr/lib/llvm-$(LLVM_VERSION)/lib/ && \
-	mv libclang.so libclang-$(LLVM_VERSION).so.$(SONAME_EXT) && \
-	ln -f -s libclang-$(LLVM_VERSION).so.$(SONAME_EXT) libclang.so.$(SONAME_EXT); \
-        ln -f -s libclang-$(LLVM_VERSION).so.$(SONAME_EXT) libclang-$(LLVM_VERSION).so; \
-	if test $(LLDB_ENABLE) = yes; then \
-		mv liblldb.so liblldb-$(LLVM_VERSION).so.$(SONAME_EXT) && \
-		ln -f -s liblldb-$(LLVM_VERSION).so.$(SONAME_EXT) liblldb.so.$(SONAME_EXT); \
-	fi; \
-	rm -f libLLVM-$(LLVM_VERSION_FULL).so
+	if test $(AUTOCONF_BUILD) = yes; then \
+		cd debian/tmp/usr/lib/llvm-$(LLVM_VERSION)/lib/ && \
+		mv libclang.so libclang-$(LLVM_VERSION).so.$(SONAME_EXT) && \
+		ln -f -s libclang-$(LLVM_VERSION).so.$(SONAME_EXT) libclang.so.$(SONAME_EXT); \
+	        ln -f -s libclang-$(LLVM_VERSION).so.$(SONAME_EXT) libclang-$(LLVM_VERSION).so; \
+		if test $(LLDB_ENABLE) = yes; then \
+			mv liblldb.so liblldb-$(LLVM_VERSION).so.$(SONAME_EXT) && \
+			ln -f -s liblldb-$(LLVM_VERSION).so.$(SONAME_EXT) liblldb.so.$(SONAME_EXT); \
+		fi; \
+		rm -f libLLVM-$(LLVM_VERSION_FULL).so; \
+	fi
 
 # Remove artefact (where compiler-rt is built)
 	if test -d $(TARGET_BUILD)/tools/clang/runtime/compiler-rt/clang_linux; then \
@@ -345,17 +347,41 @@ override_dh_auto_install:
 		cp clang/tools/clang-format/clang-format.el $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/clang; \
 		cp clang/tools/clang-format/clang-format-sublime.py $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/clang; \
 		mv $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/libLLVM-$(LLVM_VERSION).so $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/libLLVM-$(LLVM_VERSION).so.1; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/c-index-test; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/clang-tblgen; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/pp-trace; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/count; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/not; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/FileCheck; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/lli-child-target; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/libclang.so.1; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/liblldb.so.1; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/clang/run-clang-tidy.py; \
-		rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/clang/clang-tidy-diff.py; \
+	fi
+
+# Remove things that CMake or autoconf install but which aren't packaged yet,
+# or are packaged from the source or build tree.
+	if test $(AUTOCONF_BUILD) != yes; then \
+	    mv $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/clang-$(LLVM_VERSION) \
+	       $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/clang; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/clang-cl; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/scan-build; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/scan-view; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/sancov; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/c-index-test; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/clang-tblgen; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/pp-trace; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/count; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/not; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/FileCheck; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/Reporter.py; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/ScanView.py; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/startfile.py; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/lli-child-target; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/bin/lldb-argdumper; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/libexec/c++-analyzer; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/libexec/ccc-analyzer; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/libclang.so.1; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/liblldb.so.1; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/libPolly.a; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/libPollyISL.a; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/clang/$(LLVM_VERSION_FULL)/*.txt; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/python2.7/site-packages/six.py; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/clang/run-clang-tidy.py; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/clang/clang-tidy-diff.py; \
+	    rm -f $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/man/man1/scan-build.1; \
+	    rm -fr $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/clang/cmake/; \
+	    rm -fr $(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/share/scan-view/; \
 	fi
 
 # Rename binaries
@@ -455,6 +481,8 @@ else
 	NJOBS="$(NJOBS)" LD_LIBRARY_PATH=$(CURDIR)/$(TARGET_BUILD)/$(BUILD_DIR)/lib/ $(MAKE) -C $(TARGET_BUILD) check || true
 endif
 
+# In a CMake build, "check" will run tests for sub-projects as well as LLVM.
+ifeq ($(AUTOCONF_BUILD),yes)
 # clang tests
 # setup the env
 	cd $(TARGET_BUILD)/$(BUILD_DIR)/lib/ && ln -f -s libclang.so libclang.so.1 && ln -f -s libclang.so libclang-$(LLVM_VERSION).so.1
@@ -490,7 +518,8 @@ endif
 # polly tests
 	if test $(POLLY_ENABLE) = yes; then \
 		cd $(TARGET_BUILD)/ && LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(DEB_INST)/usr/lib/llvm-$(LLVM_VERSION)/lib/ $(MAKE) -C tools/polly/test/ check-polly || true; \
-    fi
+	fi
+endif
 
 # The compression of the code coverage report is done in the
 # hook B21GetCoverageResults on the server
