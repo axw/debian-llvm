@@ -7,7 +7,7 @@
 0021-shared-lib-debian.patch
 0023-link-libopagent.patch
 0044-soname.diff
-scan-build-clang-path.diff
+#scan-build-clang-path.diff
 declare_clear_cache.diff
 31-powerpcspe.diff
 34-powerpc-no-altivec.diff
@@ -35,11 +35,8 @@ hurd-EIEIO-undef.diff
 silent-MCJIIT-tests.diff
 lldb-libname.diff
 #strip-svn.diff
-lit-lang.diff
 compiler-rt-i586.diff
 clang-analyzer-force-version.diff
 #bug783205.patch
-locale-issue-ld.diff
-bug783205.patch
 fix-cmake-config-prefix.diff
-kfreebsd-build-fix.patch
+lldb-bug-25468.diff

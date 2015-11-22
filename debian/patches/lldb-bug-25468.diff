@@ -1,0 +1,14 @@
+--- a/lldb/scripts/interface/SBError.i
++++ b/lldb/scripts/interface/SBError.i
+@@ -95,9 +95,9 @@
+     void
+     SetErrorString (const char *err_str);
+ 
+-    %varargs(3, char *str = NULL) SetErrorStringWithFormat;
++    %varargs(2, char *str = NULL) SetErrorStringWithFormat;
+     int
+-    SetErrorStringWithFormat (const char *format, ...);
++    SetErrorStringWithFormat (const char *format, char *arg, ...);
+ 
+     bool
+     IsValid () const;
